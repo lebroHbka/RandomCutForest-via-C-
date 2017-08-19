@@ -1,0 +1,7 @@
+﻿bin/
+obj/
+Properties/
+
+App.config
+Program.cs
+Random Cut Forest.csproj
