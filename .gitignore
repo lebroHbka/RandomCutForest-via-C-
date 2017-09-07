@@ -1,7 +1,16 @@
-﻿bin/
-obj/
-Properties/
+﻿.vs/
+packages/
+Test/
+TestResults/
+RandomCutForest.sln
 
-App.config
-Program.cs
-Random Cut Forest.csproj
+RandomCutForest/bin/
+RandomCutForest/obj/
+RandomCutForest/Properties/
+RandomCutForest/RandomCutForest.csproj
+RandomCutForest/RandomCutForest.csproj.user
+
+RandomCutForestTests/bin/
+RandomCutForestTests/obj/
+RandomCutForestTests/Properties/
+RandomCutForestTests/RandomCutForestTests.csproj
