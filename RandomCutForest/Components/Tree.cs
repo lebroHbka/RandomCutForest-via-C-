@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace RandomCutForest.src.Components
+namespace RandomCutForest.Components
 {
     public class Tree
     {
         public Node RootNode { get; set; }
+
+        #region Constructors
 
         public Tree(Node root)
         {
@@ -20,6 +21,9 @@ namespace RandomCutForest.src.Components
             RootNode = new Node(data);
         }
 
+        #endregion
+
+        #region Create tree
 
         public void MakeTree()
         {
@@ -66,6 +70,8 @@ namespace RandomCutForest.src.Components
                 }
             }
         }
+
+        #endregion
 
         #region Add/Delete
 
@@ -123,7 +129,7 @@ namespace RandomCutForest.src.Components
                 if (a.Parent == null)
                     a.Level = 0;
                 else
-                    a.Level = a.Parent.Level + 1;
+                    a.Level = (byte)(a.Parent.Level + 1);
             };
             ForEach(UpdateLevel, newParent);
 
@@ -216,24 +222,23 @@ namespace RandomCutForest.src.Components
             if (data == null)
                 throw new ArgumentNullException("Finding node can't contain null data");
 
-            var nodes = new List<Node>();
-            nodes.Add(RootNode);
+            var includeNode = RootNode;
 
-            for (int i = 0; i < nodes.Count; i++)
+            while (true)
             {
-                if (nodes[i].Value.Equals(data))
+                if (includeNode.Value.Equals(data))
+                    break;
+                else if(includeNode.IsLeaf())   // not equal and leaf -> no such node with data
                 {
-                    return nodes[i];
+                    includeNode = null;
+                    break;
                 }
-                foreach (var child in nodes[i].Children)
+                else                            // figure out in that direction move(left, right child)
                 {
-                    if (child != null)
-                        nodes.Add(child);
+                    includeNode = (includeNode.Left.Value.IsInside(data)) ? includeNode.Left : includeNode.Right;
                 }
             }
-
-            // if condition in cicle didn't work -> no such node -> return null
-            return null;
+            return includeNode;
         }
 
         public void ForEach(Action<Node> action)
@@ -303,7 +308,7 @@ namespace RandomCutForest.src.Components
             // update levels in nested nodes in newNode
             Action<Node> Update = (Node a) =>
             {
-                a.Level = (a.Parent != null) ? a.Parent.Level + 1 : 0;
+                a.Level = (a.Parent != null) ? (byte)(a.Parent.Level + 1) : (byte)0;
             };
 
             ForEach(Update, @new);

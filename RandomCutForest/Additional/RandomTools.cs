@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace RandomCutForest.src.Additional
+namespace RandomCutForest.Additional
 {
     public static class RandomTools
     {
-        //static int seed = 423561;
-        //static Random rdm = new Random(seed);
         static Random rdm = new Random();
         static object key = new object();
-
 
 
         public static decimal RandomDecimal(decimal min, decimal max)

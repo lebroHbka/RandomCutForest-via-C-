@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using RandomCutForest.src.Components;
-using RandomCutForest.src.Additional;
+using RandomCutForest.Components;
+using RandomCutForest.Additional;
 
 namespace RandomCutForestTests.Components
 {

@@ -1,24 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace RandomCutForest.src.Components
+namespace RandomCutForest.Components
 
 {
     public class Node
     {
+
+        #region Vars
+
         public Data Value { get; }
         public Node Parent { get; set; }
         public Node Left { get; set; }
         public Node Right { get; set; }
         public IEnumerable<Node> Children { get { yield return Left; yield return Right; } }
-        public int Level { get; set; }
+        public byte Level { get; set; }
 
+        #endregion
+
+        #region Constructor
 
         public Node(Data data)
         {
             Value = data;
         }
+
+        #endregion
 
         public bool IsLeaf()
         {

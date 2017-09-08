@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using RandomCutForest.src.Components;
+using RandomCutForest.Components;
 
 namespace RandomCutForestTests.Components
 {
@@ -755,6 +755,37 @@ namespace RandomCutForestTests.Components
             var expected_find = n6;
 
             var actual_find = tree.Find(d6);
+
+            Assert.AreEqual(expected_find, actual_find);
+        }
+
+        [TestMethod]
+        public void Test_FindN9_afterDeletingN6()
+        {
+            var expected_find = n9;
+
+            tree.Delete(n6);
+
+            var actual_find = tree.Find(d9);
+
+            Assert.AreEqual(expected_find, actual_find);
+        }
+
+        [TestMethod]
+        public void Test_FindN7_afterDeletingN7()
+        {
+            // before deleting
+            var expected_find = n7;
+
+            var actual_find = tree.Find(d7);
+
+            Assert.AreEqual(expected_find, actual_find);
+
+            // after deleting
+            expected_find = null;
+
+            tree.Delete(n7);
+            actual_find = tree.Find(d7);
 
             Assert.AreEqual(expected_find, actual_find);
         }

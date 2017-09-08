@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RandomCutForest.src.Additional;
+using RandomCutForest.Additional;
 
 namespace RandomCutForestTests.AdditionalTests
 {

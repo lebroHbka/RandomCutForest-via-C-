@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using RandomCutForest.src.Additional;
+using RandomCutForest.Additional;
 
-namespace RandomCutForest.src.Components
+namespace RandomCutForest.Components
 {
     public class Data
     {
-        #region Vars
         public static byte DimensionsCount;
+
+        #region Vars
 
         public List<decimal[]> PointsList { get; set; }
         public int Length { get { return PointsList.Count; } }
@@ -20,10 +19,11 @@ namespace RandomCutForest.src.Components
         public List<decimal> BoxLen { get; private set; }
 
         public decimal SplitValue { get; set; }
-        public short SplitDimension { get; set; }
+        public byte SplitDimension { get; set; }
 
         #endregion
 
+        #region Constructor
 
         public Data(List<decimal[]> data)
         {
@@ -31,6 +31,7 @@ namespace RandomCutForest.src.Components
             CreateBoundBox();
         }
 
+        #endregion
 
         #region Add / Remove points
         public void AddPoints(Data data)
@@ -163,7 +164,7 @@ namespace RandomCutForest.src.Components
             {
                 sum -= BoxLen[i - 1];
                 splitValue = BoxMin[i - 1] + (splitValue - sum);
-                SplitDimension = (short)(i - 1);
+                SplitDimension = (byte)(i - 1);
             }
             SplitValue = splitValue;
         }
@@ -293,12 +294,6 @@ namespace RandomCutForest.src.Components
                 }
                 str.Append("]");
             }
-            str.Append("\t\tbox: ");
-            for (int i = 0; i < DimensionsCount; i++)
-            {
-                str.Append($"[{BoxMin[i]}, {BoxMax[i]}] ");
-            }
-            str.Append($"dim: {SplitDimension} sp: {SplitValue:0.###}");
             return str.ToString();
         }
     }

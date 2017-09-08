@@ -1,6 +1,7 @@
 ﻿.vs/
 packages/
 Test/
+TestGraph/
 TestResults/
 RandomCutForest.sln
 
@@ -8,7 +9,6 @@ RandomCutForest/bin/
 RandomCutForest/obj/
 RandomCutForest/Properties/
 RandomCutForest/RandomCutForest.csproj
-RandomCutForest/RandomCutForest.csproj.user
 
 RandomCutForestTests/bin/
 RandomCutForestTests/obj/
