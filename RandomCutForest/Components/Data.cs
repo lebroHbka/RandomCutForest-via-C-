@@ -1,32 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RandomCutForest.Additional;
 
 namespace RandomCutForest.Components
 {
+    /// <summary>
+    /// This class encapsulate multidimensional data points to find anomaly.
+    /// (!) Point might be all unique(at least in one dimension with some value)
+    /// </summary>
     public class Data
     {
         public static byte DimensionsCount;
 
         #region Vars
 
-        public List<decimal[]> PointsList { get; set; }
+        List<decimal[]> PointsList { get; set; }
         public int Length { get { return PointsList.Count; } }
 
-        public List<decimal> BoxMin { get; private set; }
-        public List<decimal> BoxMax { get; private set; }
-        public List<decimal> BoxLen { get; private set; }
+        List<decimal> boxMin, boxMax, boxLen;
 
-        public decimal SplitValue { get; set; }
-        public byte SplitDimension { get; set; }
+        decimal SplitValue { get; set; }
+        byte SplitDimension { get; set; }
 
         #endregion
 
         #region Constructor
 
+        /// <summary>
+        /// Initialize data with list of points(array of coordinats)
+        /// </summary>
+        /// <param name="data"></param>
         public Data(List<decimal[]> data)
         {
+            if (DimensionsCount == 0)
+                throw new Exception("Set dimension count, before using Data");
             PointsList = data;
             CreateBoundBox();
         }
@@ -34,37 +43,24 @@ namespace RandomCutForest.Components
         #endregion
 
         #region Add / Remove points
+        /// <summary>
+        /// Add new points in curent points list.
+        /// Update bounding box.
+        /// </summary>
+        /// <param name="data">New data that might be add</param>
         public void AddPoints(Data data)
         {
-            /*
-             *      Add new points in curent points list.
-             *      Not add point if this point already exists.
-             *      Update bounding box.
-             */
-
-            foreach (var otherPoint in data.PointsList)
-            {
-                bool alreadyExist = false;
-                foreach (var thisPoint in PointsList)
-                {
-                    if (DecimalTools.Compare(otherPoint, thisPoint))
-                    {
-                        alreadyExist = true;
-                        break;
-                    }
-                }
-                if (!alreadyExist)
-                    PointsList.Add(otherPoint);
-            }
+            PointsList.AddRange(data.PointsList);
             Update();
         }
 
+        /// <summary>
+        /// Remove point from current points list.
+        /// Update bounding box.
+        /// </summary>
+        /// <param name="old">Points that might be delete</param>
         public void RemovePoints(Data old)
         {
-            /*
-             *      Remove point from current points list.
-             *      Update bounding box.
-             */
             foreach (var point in old.PointsList)
             {
                 int i = 0;
@@ -73,7 +69,7 @@ namespace RandomCutForest.Components
                     if (DecimalTools.Compare(point, PointsList[i]))
                     {
                         PointsList.RemoveAt(i);
-                        continue;
+                        break;
                     }
                     i++;
                 }
@@ -85,43 +81,35 @@ namespace RandomCutForest.Components
 
         #region Bounding Box
 
+        /// <summary>
+        /// Method calculate bounding box for current points collection
+        /// </summary>
         void CreateBoundBox()
         {
-            /*
-             *    Method calculate bounding box for current points collection
-             */
-
-            BoxMin = new List<decimal>();
-            BoxMax = new List<decimal>();
-            BoxLen = new List<decimal>();
-
-            for (int i = 0; i < DimensionsCount; i++)
-            {
-                BoxMin.Add(decimal.MaxValue);
-                BoxMax.Add(decimal.MinValue);
-                BoxLen.Add(0);
-            }
+            boxMin = Enumerable.Repeat(decimal.MaxValue, DimensionsCount).ToList();
+            boxMax = Enumerable.Repeat(decimal.MinValue, DimensionsCount).ToList();
+            boxLen = Enumerable.Repeat(0M, DimensionsCount).ToList();
 
             // Finding min and max points value in each dimention to get bounding box
             for (int i = 0; i < DimensionsCount; i++)
             {
                 foreach (var p in PointsList)
                 {
-                    BoxMin[i] = (p[i] < BoxMin[i]) ? p[i] : BoxMin[i];
-                    BoxMax[i] = (p[i] > BoxMax[i]) ? p[i] : BoxMax[i];
+                    boxMin[i] = (p[i] < boxMin[i]) ? p[i] : boxMin[i];
+                    boxMax[i] = (p[i] > boxMax[i]) ? p[i] : boxMax[i];
                 }
             }
 
             // Calculate bounding box lengths(max - min) of each dimention
             for (int i = 0; i < DimensionsCount; i++)
-                BoxLen[i] = BoxMax[i] - BoxMin[i];
+                boxLen[i] = boxMax[i] - boxMin[i];
         }
 
+        /// <summary>
+        /// Create new bounding box.
+        /// </summary>
         public void Update()
         {
-            /*
-             *      Create new bounding box.
-             */
             CreateBoundBox();
         }
 
@@ -129,17 +117,14 @@ namespace RandomCutForest.Components
 
         #region Split
 
+        /// <summary>
+        /// Method choice random dimension(proportional to len) and random value for split
+        /// </summary>
         void CreateSplitData()
         {
-            /*
-             *      Choice random dimension(proportional len) and random value 
-             *      for split.
-             *
-             */
-
             // Get sum of all dimension and choice random number
             // All dimensions going one after one
-            decimal splitValue = RandomTools.RandomDecimal(0, BoxLen.Sum());
+            decimal splitValue = RandomTools.RandomDecimal(0, boxLen.Sum());
 
             decimal sum = 0;
             short i = 0;
@@ -147,14 +132,14 @@ namespace RandomCutForest.Components
             // Figure out in that dimension is splitValue(after cicle it will be i-1)
             do
             {
-                sum += BoxLen[i];
+                sum += boxLen[i];
                 i++;
             } while (sum < splitValue);
 
             // i==1 mean that splitValue in 0 dimension, simple calculation
             if (i == 1)
             {
-                splitValue = BoxMin[0] + splitValue;
+                splitValue = boxMin[0] + splitValue;
                 SplitDimension = 0;
             }
             // i > 1, to get split value in current dimension
@@ -162,13 +147,18 @@ namespace RandomCutForest.Components
             // and add to start position(min boundiong box)
             else
             {
-                sum -= BoxLen[i - 1];
-                splitValue = BoxMin[i - 1] + (splitValue - sum);
+                sum -= boxLen[i - 1];
+                splitValue = boxMin[i - 1] + (splitValue - sum);
                 SplitDimension = (byte)(i - 1);
             }
             SplitValue = splitValue;
         }
 
+        /// <summary>
+        /// Make two new points group after spliting.
+        /// </summary>
+        /// <param name="leftPoints">Points group that locate lower than split line</param>
+        /// <param name="rightPoints">Points group that locate higher than split line</param>
         public void Split(out Data leftPoints, out Data rightPoints)
         {
             /*
@@ -183,25 +173,20 @@ namespace RandomCutForest.Components
              *    
              */
 
-            List<decimal[]> left;
-            List<decimal[]> right;
-            do
-            {
-                left = new List<decimal[]>();
-                right = new List<decimal[]>();
-                // Get random dimension and value to split
-                CreateSplitData();
+            var left = new List<decimal[]>();
+            var right = new List<decimal[]>();
 
-                // sort elements in group
-                foreach (var point in PointsList)
-                {
-                    if (point[SplitDimension] < SplitValue)
-                        left.Add(point);
-                    else
-                        right.Add(point);
-                }
+            // Get random dimension and value to split
+            CreateSplitData();
+
+            // sort elements in group
+            foreach (var point in PointsList)
+            {
+                if (point[SplitDimension] < SplitValue)
+                    left.Add(point);
+                else
+                    right.Add(point);
             }
-            while ((left.Count == 0) || (right.Count == 0));
 
             leftPoints = new Data(left);
             rightPoints = new Data(right);
@@ -209,37 +194,54 @@ namespace RandomCutForest.Components
 
         #endregion
 
+        /// <summary>
+        /// Return point with position==index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public Data GetPoint(int index)
+        {
+            if ((index >= Length) || index < 0)
+                throw new ArgumentOutOfRangeException("GetPoint index out of range");
+            return new Data(new List<decimal[]> { PointsList[index] });
+        }
 
-
+        /// <summary>
+        /// Check can be other point placed in current bounding box or no.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool IsInside(Data other)
         {
-            /*
-             *      Check can be other point placed in current bounding box or no.
-             */
             foreach (var p in other.PointsList)
             {
                 for (int i = 0; i < DimensionsCount; i++)
                 {
-                    if ((p[i] > BoxMax[i]) || (p[i] < BoxMin[i]))
+                    if ((p[i] > boxMax[i]) || (p[i] < boxMin[i]))
                         return false;
                 }
             }
             return true;
         }
 
+        /// <summary>
+        /// Merge two Data object in one.
+        /// </summary>
+        /// <param name="first">First data to merge</param>
+        /// <param name="second">Second data to merge</param>
+        /// <returns>Merged data object</returns>
         public static Data Merge(Data first, Data second)
         {
-            /*
-             *      Merge two Data object in one.
-             *      Points will be merged.
-             */
             var points = first.PointsList.GetRange(0, first.Length);
-            foreach (var p in second.PointsList)
-                if (!DecimalTools.Contains(points, p))
-                    points.Add(p);
+            points.AddRange(second.PointsList);
             return new Data(points);
         }
 
+        /// <summary>
+        /// Return position of data, wich side data from split line("left"/"right")
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>"left"/"right"</returns>
         public string Position(Data data)
         {
             var point = data.PointsList.First();
@@ -250,13 +252,13 @@ namespace RandomCutForest.Components
         }
 
 
-
+        /// <summary>
+        /// Compare points value of to Data object,ordering not mean.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
-            /*
-             *      Compare points value of to Data object,
-             *      ordering not mean.
-             */
             if (!(obj is Data))
                 return false;
 
@@ -265,18 +267,19 @@ namespace RandomCutForest.Components
             if (other.Length != this.Length)
                 return false;
 
-            foreach (var otherPoint in other.PointsList)
+            foreach (var pOther in other.PointsList)
             {
-                var isConsist = false;
-                foreach (var thisPoint in PointsList)
+                bool found = false;
+                foreach (var pThis in this.PointsList)
                 {
-                    if (DecimalTools.Compare(thisPoint, otherPoint))
+                    if(DecimalTools.Compare(pOther, pThis))
                     {
-                        isConsist = true;
+                        found = true;
                         break;
+
                     }
                 }
-                if (!isConsist)
+                if (!found)
                     return false;
             }
             return true;

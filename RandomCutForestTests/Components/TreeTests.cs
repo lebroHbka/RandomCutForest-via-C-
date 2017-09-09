@@ -11,6 +11,7 @@ namespace RandomCutForestTests.Components
         Tree tree;
         Node n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10;
         Data d0, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10;
+        PrivateObject privD0, privD1, privD3, privD4, privD5;
 
 
         [TestInitialize]
@@ -43,8 +44,10 @@ namespace RandomCutForestTests.Components
                 new decimal[] {10, 9},
             };
             d0 = new Data(l0);
-            d0.SplitDimension = 1;
-            d0.SplitValue = 12.5M;
+            privD0 = new PrivateObject(d0);
+            privD0.SetFieldOrProperty("SplitDimension", (byte)1);
+            privD0.SetFieldOrProperty("SplitValue", 12.5M);
+
             n0 = new Node(d0);
             n0.Level = 0;
 
@@ -58,8 +61,10 @@ namespace RandomCutForestTests.Components
                 new decimal[] {10, 9},
             };
             d1 = new Data(l1);
-            d1.SplitDimension = 1;
-            d1.SplitValue = 5.6M;
+
+            privD1 = new PrivateObject(d1);
+            privD1.SetFieldOrProperty("SplitDimension", (byte)1);
+            privD1.SetFieldOrProperty("SplitValue", 5.6M);
             n1 = new Node(d1);
             n1.Level = 1;
 
@@ -78,8 +83,9 @@ namespace RandomCutForestTests.Components
                 new decimal[] {10, 9},
             };
             d3 = new Data(l3);
-            d3.SplitDimension = 0;
-            d3.SplitValue = 4.4M;
+            privD3 = new PrivateObject(d3);
+            privD3.SetFieldOrProperty("SplitDimension", (byte)0);
+            privD3.SetFieldOrProperty("SplitValue", 4.4M);
             n3 = new Node(d3);
             n3.Level = 2;
 
@@ -89,8 +95,9 @@ namespace RandomCutForestTests.Components
                 new decimal[] {8, 5}
             };
             d4 = new Data(l4);
-            d4.SplitDimension = 1;
-            d4.SplitValue = 4.5M;
+            privD4 = new PrivateObject(d4);
+            privD4.SetFieldOrProperty("SplitDimension", (byte)1);
+            privD4.SetFieldOrProperty("SplitValue", 4.5M);
             n4 = new Node(d4);
             n4.Level = 2;
 
@@ -100,8 +107,9 @@ namespace RandomCutForestTests.Components
                 new decimal[] {10, 9}
             };
             d5 = new Data(l5);
-            d5.SplitDimension = 0;
-            d5.SplitValue = 9.8M;
+            privD5 = new PrivateObject(d5);
+            privD5.SetFieldOrProperty("SplitDimension", (byte)0);
+            privD5.SetFieldOrProperty("SplitValue", 9.8M);
             n5 = new Node(d5);
             n5.Level = 3;
 
@@ -346,12 +354,13 @@ namespace RandomCutForestTests.Components
             var expected_N1_right = n4;
             var expected_N8_level = 3;
 
+
             var actual_D0 = n0.Value;
-            var actual_D0_bbmin = n0.Value.BoxMin;
-            var actual_D0_bbmax = n0.Value.BoxMax;
-            var actual_D1 = n1.Value;
-            var actual_D1_bbmin = n1.Value.BoxMin;
-            var actual_D1_bbmax = n1.Value.BoxMax;
+            var actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            var actual_D1 = n1.Value;                        
+            var actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
             var actual_nodes = new List<Node>();
             var actual_N1_right = n1.Right;
             var actual_N8_level = n8.Level;
@@ -369,7 +378,7 @@ namespace RandomCutForestTests.Components
             Assert.AreEqual(expected_N1_right, actual_N1_right);
             Assert.AreEqual(expected_N8_level, actual_N8_level);
 
-            // after delete
+            //after delete
             tree.Delete(n7);
 
             expected_D0 = new Data(new List<decimal[]>
@@ -396,11 +405,11 @@ namespace RandomCutForestTests.Components
             expected_N8_level = 2;
 
             actual_D0 = n0.Value;
-            actual_D0_bbmin = n0.Value.BoxMin;
-            actual_D0_bbmax = n0.Value.BoxMax;
-            actual_D1 = n1.Value;
-            actual_D1_bbmin = n1.Value.BoxMin;
-            actual_D1_bbmax = n1.Value.BoxMax;
+            actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            actual_D1 = n1.Value;                        
+            actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
             actual_nodes = new List<Node>();
             actual_N1_right = n1.Right;
             actual_N8_level = n8.Level;
@@ -409,13 +418,13 @@ namespace RandomCutForestTests.Components
 
             Assert.AreEqual(expected_D0, actual_D0);
             CollectionAssert.AreEqual(expected_D0_bbmin, actual_D0_bbmin);
-            //CollectionAssert.AreEqual(expected_D0_bbmax, actual_D0_bbmax);
-            //Assert.AreEqual(expected_D1, actual_D1);
-            //CollectionAssert.AreEqual(expected_D1_bbmin, actual_D1_bbmin);
-            //CollectionAssert.AreEqual(expected_D1_bbmax, actual_D1_bbmax);
-            //CollectionAssert.AreEqual(expected_nodes, actual_nodes);
-            //Assert.AreEqual(expected_N1_right, actual_N1_right);
-            //Assert.AreEqual(expected_N8_level, actual_N8_level);
+            CollectionAssert.AreEqual(expected_D0_bbmax, actual_D0_bbmax);
+            Assert.AreEqual(expected_D1, actual_D1);
+            CollectionAssert.AreEqual(expected_D1_bbmin, actual_D1_bbmin);
+            CollectionAssert.AreEqual(expected_D1_bbmax, actual_D1_bbmax);
+            CollectionAssert.AreEqual(expected_nodes, actual_nodes);
+            Assert.AreEqual(expected_N1_right, actual_N1_right);
+            Assert.AreEqual(expected_N8_level, actual_N8_level);
         }
                     
         [TestMethod]
@@ -448,11 +457,11 @@ namespace RandomCutForestTests.Components
             var expected_N7_level = 3;
 
             var actual_D0 = n0.Value;
-            var actual_D0_bbmin = n0.Value.BoxMin;
-            var actual_D0_bbmax = n0.Value.BoxMax;
-            var actual_D1 = n1.Value;
-            var actual_D1_bbmin = n1.Value.BoxMin;
-            var actual_D1_bbmax = n1.Value.BoxMax;
+            var actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>; 
+            var actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            var actual_D1 = n1.Value;                        
+            var actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
             var actual_nodes = new List<Node>();
             var actual_N1_right = n1.Right;
             var actual_N7_level = n7.Level;
@@ -497,11 +506,11 @@ namespace RandomCutForestTests.Components
             expected_N7_level = 2;
 
             actual_D0 = n0.Value;
-            actual_D0_bbmin = n0.Value.BoxMin;
-            actual_D0_bbmax = n0.Value.BoxMax;
-            actual_D1 = n1.Value;
-            actual_D1_bbmin = n1.Value.BoxMin;
-            actual_D1_bbmax = n1.Value.BoxMax;
+            actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            actual_D1 = n1.Value;                        
+            actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
             actual_nodes = new List<Node>();
             actual_N1_right = n1.Right;
             actual_N7_level = n7.Level;
@@ -559,14 +568,14 @@ namespace RandomCutForestTests.Components
             var expected_N10_parent = n5;
 
             var actual_D0 = n0.Value;
-            var actual_D0_bbmin = n0.Value.BoxMin;
-            var actual_D0_bbmax = n0.Value.BoxMax;
-            var actual_D1 = n1.Value;
-            var actual_D1_bbmin = n1.Value.BoxMin;
-            var actual_D1_bbmax = n1.Value.BoxMax;
-            var actual_D3 = n3.Value;
-            var actual_D3_bbmin = n3.Value.BoxMin;
-            var actual_D3_bbmax = n3.Value.BoxMax;
+            var actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            var actual_D1 = n1.Value;                                              
+            var actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
+            var actual_D3 = n3.Value;                                              
+            var actual_D3_bbmin = privD3.GetFieldOrProperty("boxMin") as List<decimal>;
+            var actual_D3_bbmax = privD3.GetFieldOrProperty("boxMax") as List<decimal>;
             var actual_nodes = new List<Node>();
             var actual_N1_left = n1.Left;
             var actual_N3_left = n3.Left;
@@ -627,14 +636,14 @@ namespace RandomCutForestTests.Components
             expected_N10_parent = n3;
 
             actual_D0 = n0.Value;
-            actual_D0_bbmin = n0.Value.BoxMin;
-            actual_D0_bbmax = n0.Value.BoxMax;
-            actual_D1 = n1.Value;
-            actual_D1_bbmin = n1.Value.BoxMin;
-            actual_D1_bbmax = n1.Value.BoxMax;
-            actual_D3 = n3.Value;
-            actual_D3_bbmin = n3.Value.BoxMin;
-            actual_D3_bbmax = n3.Value.BoxMax;
+            actual_D0_bbmin = privD0.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D0_bbmax = privD0.GetFieldOrProperty("boxMax") as List<decimal>;
+            actual_D1 = n1.Value;                        
+            actual_D1_bbmin = privD1.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D1_bbmax = privD1.GetFieldOrProperty("boxMax") as List<decimal>;
+            actual_D3 = n3.Value;                        
+            actual_D3_bbmin = privD3.GetFieldOrProperty("boxMin") as List<decimal>;
+            actual_D3_bbmax = privD3.GetFieldOrProperty("boxMax") as List<decimal>;
             actual_nodes = new List<Node>();
             actual_N1_left = n1.Left;
             actual_N3_left = n3.Left;
@@ -735,6 +744,7 @@ namespace RandomCutForestTests.Components
 
             Assert.AreEqual(expected_tree_complexity, actual_tree_complexity);
         }
+        
         #endregion
 
         #region Find
@@ -811,13 +821,6 @@ namespace RandomCutForestTests.Components
         #endregion
 
         #region ForEach
-
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
-        public void Test_ForEach_StartFromNull()
-        {
-            tree.ForEach((Node a) => { }, null);
-        }
 
         [TestMethod]
         public void Test_ForEach_FromRoot()
@@ -919,13 +922,6 @@ namespace RandomCutForestTests.Components
 
         #region UpwardForEach
 
-        [ExpectedException(typeof(ArgumentNullException))]
-        [TestMethod]
-        public void Test_UpwardForEach_nullObject()
-        {
-            tree.ForEach((Node a)=> { }, null);
-        }
-
         [TestMethod]
         public void Test_UpwardForEachN3()
         {
@@ -937,6 +933,7 @@ namespace RandomCutForestTests.Components
             Assert.AreEqual(expected_nodes_count, actual_nodes_count);
 
         }
+
         #endregion
 
 

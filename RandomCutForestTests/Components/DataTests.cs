@@ -2,7 +2,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using RandomCutForest.Components;
-using RandomCutForest.Additional;
 
 namespace RandomCutForestTests.Components
 {
@@ -83,14 +82,97 @@ namespace RandomCutForestTests.Components
             var expected_d2_add_d4 = new Data(new List<decimal[]>
             {
                 new decimal[]{3, 3},
-                new decimal[]{2, 8}
+                new decimal[]{2, 8},
+                new decimal[]{3, 3}
             });
 
             d2.AddPoints(d4);
             var actual_d2_add_d4 = d2;
 
             Assert.AreEqual(expected_d2_add_d4, actual_d2_add_d4, "d2 add d2");
+        }
 
+        [TestMethod]
+        public void Test_AddPoints_withSameElements2()
+        {
+            var d6 = new Data(new List<decimal[]>
+            {
+                new decimal[]{3, 3},
+                new decimal[]{2, 8}
+            });
+            var expected_d2_add_d4_d6 = new Data(new List<decimal[]>
+            {
+                new decimal[]{3, 3},
+                new decimal[]{2, 8},
+                new decimal[]{3, 3},
+                new decimal[]{3, 3},
+                new decimal[]{2, 8}
+            });
+
+            d2.AddPoints(d4);
+            d2.AddPoints(d6);
+            var actual_d2_add_d4_d6 = d2;
+
+            Assert.AreEqual(expected_d2_add_d4_d6, actual_d2_add_d4_d6, "d2 add d2");
+
+        }
+
+        #endregion
+
+        #region GetPoint
+
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod]
+        public void Test_GetPoint_IndexOutOfrange()
+        {
+            d1.GetPoint(10);
+        }
+
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod]
+        public void Test_GetPoint_IndexLessZero()
+        {
+            d1.GetPoint(-1);
+        }
+
+        [TestMethod]
+        public void Test_GetPoint_d1_ind_0()
+        {
+            var expected_point = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 2}
+            });
+
+            var actuar_point = d1.GetPoint(0);
+
+            Assert.AreEqual(expected_point, actuar_point);
+        }
+
+        [TestMethod]
+        public void Test_GetPoint_d1_ind_1()
+        {
+            var expected_point = new Data(new List<decimal[]>
+            {
+                new decimal[]{2, 3}
+            });
+
+            var actuar_point = d1.GetPoint(1);
+
+            Assert.AreEqual(expected_point, actuar_point);
+        }
+
+        [TestMethod]
+        public void Test_GetPoint_Crash()
+        {
+            var expected_point = new Data(new List<decimal[]>
+            {
+                new decimal[]{2, 3},
+                new decimal[]{2, 3}
+            });
+
+            var actuar_point = d1.GetPoint(1);
+
+            Assert.AreNotEqual(expected_point, actuar_point);
         }
 
         #endregion
@@ -136,6 +218,92 @@ namespace RandomCutForestTests.Components
 
             Assert.AreEqual(expected_d2_remove_d4, actual_d2_remove_d4);
             Assert.AreEqual(expected_d6_remove_d5, actual_d6_remove_d5);
+        }
+
+        [TestMethod]
+        public void Test_RemovePoints_DuplicPoints()
+        {
+            var d1 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{1, 1},
+                new decimal[]{1, 1},
+                new decimal[]{1, 1}
+            });
+            var d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1}
+            });
+
+            var expected_d1_rem_d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{1, 1},
+                new decimal[]{1, 1},
+            });
+
+            d1.RemovePoints(d2);
+            var actual_d1_rem_d2 = d1;
+
+
+            Assert.AreEqual(expected_d1_rem_d2, actual_d1_rem_d2);
+        }
+
+        [TestMethod]
+        public void Test_RemovePoints_DuplicPoints2()
+        {
+            var d1 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{2, 2},
+                new decimal[]{1, 1},
+                new decimal[]{2, 2}
+            });
+            var d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{2, 2}
+            });
+
+            var expected_d1_rem_d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{2, 2}
+            });
+
+            d1.RemovePoints(d2);
+            var actual_d1_rem_d2 = d1;
+
+
+            Assert.AreEqual(expected_d1_rem_d2, actual_d1_rem_d2);
+        }
+
+        [TestMethod]
+        public void Test_RemovePoints_DuplicPoints3()
+        {
+            var d1 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{2, 2},
+                new decimal[]{2, 2}
+            });
+            var d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{1, 1},
+                new decimal[]{1, 1},
+                new decimal[]{2, 2}
+            });
+
+            var expected_d1_rem_d2 = new Data(new List<decimal[]>
+            {
+                new decimal[]{2, 2}
+            });
+
+            d1.RemovePoints(d2);
+            var actual_d1_rem_d2 = d1;
+
+
+            Assert.AreEqual(expected_d1_rem_d2, actual_d1_rem_d2);
         }
 
         #endregion
@@ -202,7 +370,8 @@ namespace RandomCutForestTests.Components
             var expected_D6 = new Data(new List<decimal[]>
             {
                 new decimal[]{3, 3},
-                new decimal[]{2, 8}
+                new decimal[]{2, 8},
+                new decimal[]{3, 3},
             });
 
 
@@ -265,20 +434,23 @@ namespace RandomCutForestTests.Components
         public void Test_Position()
         {
             // { 1, 2 },{ 2, 3 }
-            d1.SplitDimension = 1;
-            d1.SplitValue = 2.4M;
+            PrivateObject privD1 = new PrivateObject(d1);
+            privD1.SetProperty("SplitDimension", (byte)1);
+            privD1.SetProperty("SplitValue", 2.4M);
 
-            // {3, 3},{ 2, 8 }
-            d2.SplitDimension = 0;
-            d2.SplitValue = 2.3M;
+            //// {3, 3},{ 2, 8 }
+            PrivateObject privD2 = new PrivateObject(d2);
+            privD2.SetProperty("SplitDimension", (byte)0);
+            privD2.SetProperty("SplitValue", 2.3M);
 
             var d3 = new Data(new List<decimal[]>
             {
                 new decimal[]{9, 8},
                 new decimal[]{20, 3},
             });
-            d3.SplitDimension = 0;
-            d3.SplitValue = 10;
+            PrivateObject privD3 = new PrivateObject(d3);
+            privD3.SetProperty("SplitDimension", (byte)0);
+            privD3.SetProperty("SplitValue", 10M);
 
             var p1 = new Data(new List<decimal[]>
             {
@@ -316,6 +488,7 @@ namespace RandomCutForestTests.Components
         #endregion
 
         #region Equal
+
         [TestMethod]
         public void Test_Equal()
         {

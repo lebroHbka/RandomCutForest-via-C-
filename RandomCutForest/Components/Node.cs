@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 
 namespace RandomCutForest.Components
-
 {
+    /// <summary>
+    /// This class represent node that stored in tree.
+    /// </summary>
     public class Node
     {
-
         #region Vars
 
         public Data Value { get; }
@@ -26,21 +27,24 @@ namespace RandomCutForest.Components
 
         #endregion
 
+        /// <summary>
+        /// Check has this node children or no.
+        /// </summary>
+        /// <returns></returns>
         public bool IsLeaf()
         {
-            /*
-             *      Check has this node children or no.
-             */
             if ((Left == null) && (Right == null))
                 return true;
             return false;
         }
 
+        /// <summary>
+        /// Compare exactly Data objects that store both nodes.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public override bool Equals(object obj)
         {
-            /*
-             *      Compare exactly Data object that store both nodes.
-             */
             if (!(obj is Node))
                 return false;
             var data = (obj as Node).Value;

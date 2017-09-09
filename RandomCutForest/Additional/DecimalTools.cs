@@ -2,13 +2,19 @@
 
 namespace RandomCutForest.Additional
 {
+    /// <summary>
+    /// Class that help working with decimal, that needed in alghoritm
+    /// </summary>
     public static class DecimalTools
     {
+        /// <summary>
+        /// Compare array with value, order is mean(!)
+        /// </summary>
+        /// <param name="a">First array</param>
+        /// <param name="b">Second array</param>
+        /// <returns></returns>
         public static bool Compare(decimal[] a, decimal[] b)
         {
-            /*
-             *      Compare array with value, order is mean
-             */
             if (a.Length != b.Length)
                 return false;
 
@@ -18,19 +24,6 @@ namespace RandomCutForest.Additional
                     return false;
             }
             return true;
-        }
-
-        public static bool Contains(List<decimal[]> list, decimal[] element)
-        {
-            /*
-             *      Check contain list element or no.
-             */
-            foreach (var p in list)
-            {
-                if (Compare(p, element))
-                    return true;
-            }
-            return false;
         }
 
     }

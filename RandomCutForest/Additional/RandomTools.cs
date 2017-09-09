@@ -2,18 +2,22 @@
 
 namespace RandomCutForest.Additional
 {
+    /// <summary>
+    /// Class that help working with random, make it thread safe
+    /// </summary>
     public static class RandomTools
     {
         static Random rdm = new Random();
         static object key = new object();
 
-
+        /// <summary>
+        /// Return random decimal in some range.
+        /// </summary>
+        /// <param name="min">Min value(inclusive)</param>
+        /// <param name="max">Max value(exclusive)</param>
+        /// <returns></returns>
         public static decimal RandomDecimal(decimal min, decimal max)
         {
-            /*
-             *      Return random decimal in some range.
-             *      Thread safe
-             */
             decimal randValue;
 
             if (min == max)
@@ -38,12 +42,14 @@ namespace RandomCutForest.Additional
             return randValue;
         }
 
+        /// <summary>
+        /// Return random integer.
+        /// </summary>
+        /// <param name="min">Min value(inclusive)</param>
+        /// <param name="max">Max value(exclusive)</param>
+        /// <returns></returns>
         public static int RandomInt(int min, int max)
         {
-            /*
-             *     Return random integer.
-             *     Thread safe
-             */
             int r;
             lock (key)
             {

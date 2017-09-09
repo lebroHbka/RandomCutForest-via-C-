@@ -46,25 +46,5 @@ namespace RandomCutForestTests.AdditionalTests
             Assert.AreEqual(expectedCompare_a2_a4, actualCompare_a2_a4);
         }
 
-        [TestMethod]
-        public void Test_Contains()
-        {
-            var l = new List<decimal[]>
-            {
-                new decimal[] { 1, 2 },
-                new decimal[] { 1, 5 },
-                new decimal[] { 1, 2, 4 }
-            };
-
-            var expected_l_cont_a1 = true;
-            var expected_l_cont_a2 = false;
-
-            var actual_l_cont_a1 = DecimalTools.Contains(l, a1);
-            var actual_l_cont_a2 = DecimalTools.Contains(l, a2);
-
-            Assert.AreEqual(expected_l_cont_a1, actual_l_cont_a1);
-            Assert.AreEqual(expected_l_cont_a2, actual_l_cont_a2);
-        }
-
     }
 }

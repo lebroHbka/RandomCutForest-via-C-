@@ -5,26 +5,38 @@ using System.Text;
 
 namespace RandomCutForest.Components
 {
+    /// <summary>
+    /// This class represent tree that stored in Random Cut Forest.
+    /// </summary>
     public class Tree
     {
         public Node RootNode { get; set; }
 
         #region Constructors
 
-        public Tree(Node root)
+        /// <summary>
+        /// Initialize tree with special root node.
+        /// </summary>
+        /// <param name="node">Root node</param>
+        public Tree(Node node)
         {
-            RootNode = root;
+            RootNode = node;
         }
-
-        public Tree(Data data)
+        /// <summary>
+        /// Initialize tree with special root node.
+        /// </summary>
+        /// <param name="node">Root node</param>
+        public Tree(Data data) : this(new Node(data))
         {
-            RootNode = new Node(data);
         }
 
         #endregion
 
         #region Create tree
 
+        /// <summary>
+        /// Build tree by spliting root node, untill all point will be leafs.
+        /// </summary>
         public void MakeTree()
         {
             /*
@@ -75,19 +87,19 @@ namespace RandomCutForest.Components
 
         #region Add/Delete
 
+        /// <summary>
+        ///   Add new point in tree by algorithm.
+        /// </summary>
+        /// <param name="newNode">New node that will be inserted in tree</param>
         public void Add(Node newNode)
         {
-            /*
-             *      Add new point in tree by algorithm.
-             *           
-             */
-
             Node newParent;
             var node = RootNode;
             while (true)
             {
                 // merge node with new point
                 newParent = new Node(Data.Merge(node.Value, newNode.Value));
+
                 // make split from merged node
                 Data parentLeft, parentRight;
                 newParent.Value.Split(out parentLeft, out parentRight);
@@ -96,18 +108,23 @@ namespace RandomCutForest.Components
                 if ((parentLeft.IsInside(node.Value)) || (parentRight.IsInside(node.Value)))
                 {
                     // create new parent with child - node, newNode(newData)
-                    newParent.Left = (parentLeft.IsInside(node.Value)) ? node : newNode;
-                    newParent.Right = (parentRight.IsInside(node.Value)) ? node : newNode;
-
-                    // create new root
-                    if (node.Parent == null)
+                    if (parentLeft.IsInside(node.Value))
                     {
-                        RootNode = newParent;
+                        newParent.Left = node;
+                        newParent.Right = newNode;
                     }
                     else
                     {
-                        Replace(node, newParent);
+                        newParent.Left = newNode;
+                        newParent.Right = node;
                     }
+
+                    // create new root
+                    if (node.Parent == null)
+                        RootNode = newParent;
+                    else
+                        Replace(node, newParent);
+
                     // change dependency
                     node.Parent = newParent;
                     newNode.Parent = newParent;
@@ -137,6 +154,10 @@ namespace RandomCutForest.Components
             UpwardForEach(UpdateNodes, newParent);
         }
 
+        /// <summary>
+        /// Delete node(might be exists) from tree.
+        /// </summary>
+        /// <param name="node">Node that will be delete</param>
         public void Delete(Node node)
         {
             /*
@@ -152,20 +173,20 @@ namespace RandomCutForest.Components
 
             // delete old node
             Action<Node> UpdateNodes = (Node a) => { a.Value.RemovePoints(node.Value); };
-            UpwardForEach(UpdateNodes, sibling);
+            UpwardForEach(UpdateNodes, sibling.Parent);
         }
 
         #endregion
 
         #region Anomaly/Complexity
 
+        /// <summary>
+        /// Method calculate and return CoDisp of node(might be exists).
+        /// </summary>
+        /// <param name="node">Node that calculate CoDisp</param>
+        /// <returns>CoDisp value</returns>
         public int CoDisp(Node node)
         {
-            /*
-             *      Calculate CoDisp.
-             *      
-             *      
-             */
             var parent = node.Parent;
             if (parent == null)
                 return 0;
@@ -186,11 +207,12 @@ namespace RandomCutForest.Components
             return coDisp;
         }
 
+        /// <summary>
+        /// Calculate complexity of tree - sum of all leafs levels.
+        /// </summary>
+        /// <returns></returns>
         public int Complexity()
         {
-            /*
-             *      Calculate complexity of tree - sum of all leafs levels.
-             */
             int compexity = 0;
 
             Action<Node> CalcLevels = (Node a) => { if (a.IsLeaf()) compexity += a.Level; };
@@ -200,23 +222,26 @@ namespace RandomCutForest.Components
 
         #endregion
 
+        /// <summary>
+        /// Set new children from list to parent node.
+        /// </summary>
+        /// <param name="parent">Node that need change children</param>
+        /// <param name="children">New children for parent node</param>
         public void ChangeChildren(Node parent, List<Node> children)
         {
-            /*
-             *      Set new children from list.
-             */
             if (children.Count != 2)
                 throw new ArgumentException("Parent can get only 2 new child");
             parent.Left = children[0];
             parent.Right = children[1];
         }
 
+        /// <summary>
+        /// Find node that contain data
+        /// </summary>
+        /// <param name="data">Data that need find</param>
+        /// <returns></returns>
         public Node Find(Data data)
         {
-            /*
-             *   Find node that contain DataContainer - <data>
-             */
-
             // <nodes> - collection with all nodes that contain <data>
             // start value roots children
             if (data == null)
@@ -241,21 +266,27 @@ namespace RandomCutForest.Components
             return includeNode;
         }
 
+        /// <summary>
+        /// Iterate over all tree(breadth-first search)
+        /// </summary>
+        /// <param name="action">Action</param>
         public void ForEach(Action<Node> action)
         {
-            /*
-             *    Iterate over all tree
-             */
             ForEach(action, RootNode);
         }
 
+        /// <summary>
+        /// Iterate over all tree(breadth-first search), starting from start node
+        /// </summary>
+        /// <param name="action">Action</param>
+        /// <param name="start">Start node</param>
         public void ForEach(Action<Node> action, Node start)
         {
             /*
              *    Iterate over all nodes(branches) that has started from <start> node
              */
             if (start == null)
-                throw new ArgumentNullException("ForEach can't iterate from null node");
+                return;
             var nodes = new Queue<Node>();
             action(start);
             foreach (var c in start.Children)
@@ -275,12 +306,15 @@ namespace RandomCutForest.Components
             }
         }
 
+        /// <summary>
+        /// Replace old branch(start in node "old") with new(start in node "new")
+        /// </summary>
+        /// <param name="old"></param>
+        /// <param name="new"></param>
         public void Replace(Node old, Node @new)
         {
             /*
-             *   Replace <old> node with <new> node
-             *   
-             *   All <old> node branch is gone.
+             *   All "old" node branch is gone.
              *   (!) If @new has parent he still has child @new
              *   
              *   Level will be update
@@ -314,11 +348,13 @@ namespace RandomCutForest.Components
             ForEach(Update, @new);
         }
 
+        /// <summary>
+        /// Get sibling(nodes that has same parent with "node") of "node"
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public Node Siblings(Node node)
         {
-            /*
-             *    Get all siblings(nodes that has same parent with node) of <node>
-             */
             if (node == null)
                 throw new ArgumentNullException("Null node has no siblings");
 
@@ -353,13 +389,15 @@ namespace RandomCutForest.Components
             return str.ToString();
         }
 
+        /// <summary>
+        /// Iterate upside down, start from "start" node, and came up to root
+        /// </summary>
+        /// <param name="action">Action</param>
+        /// <param name="start">Start position</param>
         public void UpwardForEach(Action<Node> action, Node start)
         {
-            /*
-             *    Iterate upside down, start from <start> node, and came up to root
-             */
             if (start == null)
-                throw new ArgumentNullException("UpwardForEach can't iterate from null node");
+                return;
             var node = start;
 
             while (node != null)
